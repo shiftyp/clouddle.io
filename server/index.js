@@ -1,9 +1,24 @@
-var express = require('express');
+'use strict';
 
-var app = express();
+let express = require('express');
 
-app.get('/', function(req, res) {
+let app = express();
+let http = require('http').Server(app);
+let io = require('socket.io')(http);
+let connectionHandler = require('./sockets').bind(null, io);
+
+const PORT = process.env.PORT || 8080;
+
+app.get('/', (req, res) => {
 	res.send('Hello World!');
 });
 
-app.listen(8080);
+io.on('connection', connectionHandler);
+
+http.listen(PORT, (err) => {
+	if (err) {
+		console.log(err);
+	} else {
+		console.log(`App is listening on ${PORT}`);
+	}
+});
