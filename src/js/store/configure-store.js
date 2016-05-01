@@ -9,12 +9,12 @@ let createStoreWithMiddleware;
 // Configure the dev tools when in DEV mode
 if (__DEV__) {
   createStoreWithMiddleware = compose(
-    applyMiddleware(thunkMiddleware),
-		createLogger(),
-    devTools()
+    applyMiddleware(thunkMiddleware, createLogger()),
+		devTools()
   )(createStore);
 } else {
   createStoreWithMiddleware = applyMiddleware(thunkMiddleware)(createStore);
+}
 
 const rootReducer = combineReducers(reducers);
 

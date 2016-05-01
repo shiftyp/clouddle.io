@@ -16,3 +16,9 @@ export const initializeMessageSockets = () => {
 		});
 	};
 };
+
+export const sendMessage = (msg) => {
+	return () => {
+		socket.emit('message', msg);
+	};
+};

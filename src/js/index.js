@@ -33,7 +33,7 @@ var Routes = (
 	</Router>
 );
 
-store.dispatch(initializeIndex());
+initializeIndex();
 
 var Wrapper = wrapperGenerator(App);
 
