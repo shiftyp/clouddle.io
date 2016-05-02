@@ -9,16 +9,26 @@ let connectionHandler = require('./sockets').bind(null, io);
 
 const PORT = process.env.PORT || 8080;
 
-app.get('/', (req, res) => {
-	res.send('Hello World!');
+let db = require('./db');
+
+app.use('/assets', express.static('dist'));
+
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 io.on('connection', connectionHandler);
 
-http.listen(PORT, (err) => {
-	if (err) {
-		console.log(err);
-	} else {
-		console.log(`App is listening on ${PORT}`);
-	}
-});
+db.initialize()
+	.then(() => {
+		http.listen(PORT, (err) => {
+			if (err) {
+				 throw err;
+			} else {
+				console.log(`App is listening on ${PORT}`);
+			}
+		});
+	})
+	.catch((err) => {
+		throw err
+	});
