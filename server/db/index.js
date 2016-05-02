@@ -1,8 +1,13 @@
 'use strict';
 
 let r = require('rethinkdb');
+//let rx = require('rxjs');
+
 
 let dbConfig = require('../db-config');
+
+let initMessage = (name) => `Database ${name} initialized.`;
+let errorMessage = (err) => `Database could not be initialized: ${err}`;
 
 let connect = () => (
 	r.connect(dbConfig.rethinkdb)
@@ -11,19 +16,63 @@ let connect = () => (
 
 let wrapConnect = (fn) => {
 	return function() {
-		connect().then(fn.bind(null, ...arguments));
+		return connect().then(fn.bind(null, ...arguments));
 	};
 };
 
-let initialize = wrapConnect((callback, conn) => {
-	r.table('messages').indexWait('createdAt').run(conn).then(function() {
-		console.log("Table and index are available, starting express...");
-		callback();
-	}).error(function(err) {
-		console.log(`Unable to connect to RethinkDB: ${err}. Exiting.`);
-		process.exit(1);
-	});
-});
+let createTables = (conn) => (
+	r.tableCreate('messages').indexCreate('createdAt').run(conn)
+);
+
+let initializeTables = (conn) => (
+	r.table('messages').indexWait('createdAt').run(conn)
+);
+
+let createDb = (conn) => (
+	r.dbCreate(dbConfig.rethinkdb.db).run(conn)
+);
+
+let initialize = () => (
+	new Promise((resolve, reject) => {
+		let rejectWithError = (err) => {
+			reject(new Error(errorMessage(err)));
+		};
+
+		let resolveWithLog = () => {
+			console.log(initMessage(dbConfig.rethinkdb.db));
+			resolve();
+		};
+		
+		let createAndInitTables = (conn) => (
+			createTables(conn)
+				.then(() => {
+					initializeTables(conn)
+						.then(resolveWithLog)
+						.error(rejectWithError)
+				})
+		);
+
+		connect()
+			.then((conn) => {
+				initializeTables(conn)
+					.then(resolveWithLog)
+					.error((err) => {
+						console.log(`Error making tables: ${err}\nTrying db create`);
+						createDb(conn)
+							.then(() => {
+								createAndInitTables(conn)
+									.error(rejectWithError);
+							})
+							.error((err) => {
+								console.log(`Error creating DB: ${err}\nTrying to create tables.`);
+								createAndInitTables(conn)
+									.error(rejectWithError);
+							});
+					});
+			})
+			.error(rejectWithError);
+	})
+);
 
 let insertMessage = wrapConnect((msg, conn) => {
 	r.table('messages').insert({ 
@@ -35,5 +84,6 @@ let insertMessage = wrapConnect((msg, conn) => {
 });
 
 module.exports = {
-	insertMessage
+	insertMessage,
+	initialize
 };
