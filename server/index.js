@@ -1,15 +1,15 @@
 'use strict';
 
+let path = require('path');
 let express = require('express');
 
 let app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 let connectionHandler = require('./sockets').bind(null, io);
+let db = require('./db');
 
 const PORT = process.env.PORT || 8080;
-
-let db = require('./db');
 
 app.use('/assets', express.static('dist'));
 
