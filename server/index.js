@@ -19,7 +19,7 @@ app.get('*', function(req, res) {
 
 io.on('connection', connectionHandler);
 
-db.initialize()
+db.initialize(io)
 	.then(() => {
 		http.listen(PORT, (err) => {
 			if (err) {
