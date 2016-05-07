@@ -1,12 +1,13 @@
-'use strict';
-
-let db = require('../db');
+const db = require('../db');
+const { bindParseMessage } = require('../utils');
 
 let loggedInUsers = [];
 let messages = [];
+let userId = 0;
 
-let connectionHandler = (io, socket) => {
-	console.log('User Connected');
+const connectionHandler = (io, socket) => {
+	let user = {};
+
 
 	socket.emit('connection', JSON.stringify({
 		messages: messages,
@@ -14,22 +15,18 @@ let connectionHandler = (io, socket) => {
 	}));
 
 	socket.on('register', (msg) => {
-		let user = null;
+		user.id = userId++;
 
-		try {
-			user = JSON.parse(msg);
-		} catch (error) {
-			console.log(error.message);
-		}
-		
+		console.log('User Connected');
+
 		if (user) {
 			loggedInUsers.push(user);
 			io.emit('register', user);
 		}
-	});
-	socket.on('disconnect', () => console.log('User Disconnected'));
-	socket.on('message', (msg) => {
-		io.emit('message', msg);
+		socket.on('disconnect', () => console.log('User Disconnected'));
+		socket.on('message', (msg) => {
+			db.insertMessage(msg);
+		});
 	});
 };
 

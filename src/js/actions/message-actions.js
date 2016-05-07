@@ -1,5 +1,4 @@
 import socket from '../constants/socket';
-
 import { MESSAGE_RECIEVED } from '../constants/action-types';
 
 const recieveMessage = (msg) => {
@@ -17,8 +16,17 @@ export const initializeMessageSockets = () => {
 	};
 };
 
+export const tearDownMessageSockets = () => {
+	return () => {
+		socket.removeAllListeners('message');
+	}
+}
+
 export const sendMessage = (msg) => {
 	return () => {
-		socket.emit('message', msg);
+		socket.emit('message', {
+			userId: 10,
+			text: msg
+		});
 	};
 };

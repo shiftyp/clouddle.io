@@ -11,7 +11,7 @@ let db = require('./db');
 
 const PORT = process.env.PORT || 8080;
 
-app.use('/assets', express.static('dist'));
+app.use('/assets', express.static('../dist'));
 
 app.get('*', function(req, res) {
   res.sendFile(path.join(__dirname, './public/index.html'));
@@ -23,12 +23,13 @@ db.initialize(io)
 	.then(() => {
 		http.listen(PORT, (err) => {
 			if (err) {
-				 throw err;
+				 throw new Error(err);
 			} else {
 				console.log(`App is listening on ${PORT}`);
 			}
 		});
 	})
 	.catch((err) => {
-		throw err
+		console.log(err.message);
+		process.exit(1);
 	});
