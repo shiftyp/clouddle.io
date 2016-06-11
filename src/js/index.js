@@ -39,6 +39,4 @@ var Routes = (
 	</Router>
 );
 
-initializeIndex();
-
 ReactDOM.render(Routes, document.getElementById('main'));

@@ -88,7 +88,7 @@ const initialize = bindDbInterface((db) => (
     .catch(failure)
 ));
 
-const insertMessage = wrapInPromise(bindConnect((userId, msg, conn) => {
+const insertMessage = wrapInPromise(bindConnect((msg, conn) => {
 	r.table('messages').insert({ 
 		userId: msg.userId,
 		text: msg.text, 

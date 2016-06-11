@@ -4,7 +4,7 @@ import { initializeMessageSockets } from './message-actions';
 
 export const initializeIndex = (nextState, replaceState) => {
 	return (dispatch, getState) => {
-		if (getIdToken) {
+		if (getIdToken()) {
 			socket.emit('register');
 			dispatch(initializeMessageSockets());
 		} else {
